@@ -46,8 +46,8 @@ export default async function SearchPage({
             {games.map((game) => (
               <GameCard 
                 key={game.id} 
-                game={game} 
-                studioName={game.developers?.studio_name || 'Unknown'} 
+                game={game as any} 
+                studioName={(game.developers as any)?.studio_name || 'Unknown'} 
               />
             ))}
           </div>

@@ -55,7 +55,7 @@ export default async function CategoryPage({ params }: Props) {
               <GameCard 
                 key={game.id} 
                 game={game} 
-                studioName={game.developers?.studio_name || 'Unknown'} 
+                studioName={(game.developers as any)?.studio_name || 'Unknown'} 
               />
             ))}
           </div>
