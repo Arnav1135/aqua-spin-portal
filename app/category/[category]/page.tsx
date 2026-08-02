@@ -44,6 +44,12 @@ export default async function CategoryPage({ params }: Props) {
             <Link href="/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm">
               <ArrowLeft className="w-4 h-4" /> Back Home
             </Link>
+            <Link 
+              href="/developer" 
+              className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
+            >
+              Developer Portal
+            </Link>
           </div>
           <Link href="/" className="flex items-center gap-2 group">
             <Gamepad2 className="w-5 h-5 text-cyan-400" />
