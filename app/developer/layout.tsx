@@ -22,6 +22,13 @@ export default async function DeveloperLayout({
     .eq('id', user.id)
     .single();
 
+  // Check their role
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white selection:bg-cyan-500/30 flex">
       {/* Sidebar Navigation */}
@@ -50,7 +57,12 @@ export default async function DeveloperLayout({
           )}
         </div>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 flex flex-col gap-2">
+          {userProfile?.role === 'admin' && (
+            <Link href="/admin" className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left font-medium">
+              Admin Portal
+            </Link>
+          )}
           <form action="/auth/signout" method="POST">
             <button className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors text-left">
               <LogOut className="w-4 h-4" /> Sign Out
