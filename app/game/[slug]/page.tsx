@@ -37,7 +37,7 @@ export default async function GamePage({ params }: Props) {
   
   const { data: game } = await supabase
     .from('games')
-    .select('*, developers(studio_name)')
+    .select('*, developers(id, studio_name)')
     .eq('slug', params.slug)
     .single();
 
@@ -86,7 +86,13 @@ export default async function GamePage({ params }: Props) {
         <div className="mb-6">
           <h1 className="text-4xl font-bold mb-2">{game.title}</h1>
           <p className="text-neutral-400 flex items-center gap-2">
-            By <span className="text-white font-medium">{game.developers?.studio_name || 'Unknown Studio'}</span>
+            By {game.developers ? (
+              <Link href={`/studio/${game.developers.id}`} className="text-white font-medium hover:text-cyan-400 hover:underline transition-colors">
+                {game.developers.studio_name}
+              </Link>
+            ) : (
+              <span className="text-white font-medium">Unknown Studio</span>
+            )}
             <span className="w-1 h-1 bg-neutral-600 rounded-full" />
             <span className="text-cyan-400">{game.category}</span>
           </p>

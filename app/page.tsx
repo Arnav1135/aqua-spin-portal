@@ -14,7 +14,7 @@ export default async function Home({
 
   let request = supabase
     .from('games')
-    .select('id, title, slug, thumbnail_url, category')
+    .select('id, title, slug, thumbnail_url, category, developers(id, studio_name)')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(24);
@@ -90,11 +90,18 @@ export default async function Home({
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-4">
-                    <h2 className="font-semibold text-lg leading-tight mb-1">{game.title}</h2>
-                    <span className="text-xs font-medium text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full uppercase tracking-wider">
-                      {game.category}
-                    </span>
+                  <div className="absolute bottom-0 left-0 p-4 w-full">
+                    <h2 className="font-semibold text-lg leading-tight mb-1 truncate">{game.title}</h2>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs font-medium text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full uppercase tracking-wider">
+                        {game.category}
+                      </span>
+                      {game.developers && (
+                        <span className="text-xs text-neutral-400 truncate max-w-[120px]">
+                          By {game.developers.studio_name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>

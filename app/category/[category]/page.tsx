@@ -25,7 +25,7 @@ export default async function CategoryPage({ params }: Props) {
   
   const { data: games, error } = await supabase
     .from('games')
-    .select('id, title, slug, thumbnail_url, category')
+    .select('id, title, slug, thumbnail_url, category, developers(id, studio_name)')
     .eq('status', 'approved')
     .ilike('category', category)
     .order('created_at', { ascending: false });
@@ -81,8 +81,13 @@ export default async function CategoryPage({ params }: Props) {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-4">
-                    <h2 className="font-semibold text-lg leading-tight mb-1">{game.title}</h2>
+                  <div className="absolute bottom-0 left-0 p-4 w-full">
+                    <h2 className="font-semibold text-lg leading-tight mb-1 truncate">{game.title}</h2>
+                    {game.developers && (
+                      <span className="text-xs text-neutral-400 truncate block mt-2">
+                        By {game.developers.studio_name}
+                      </span>
+                    )}
                   </div>
                 </div>
               </Link>
