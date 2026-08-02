@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Maximize2, Minimize2, AlertTriangle } from 'lucide-react';
 
 interface GamePlayerProps {
@@ -23,12 +23,14 @@ export function GamePlayer({ title, iframeUrl }: GamePlayerProps) {
   };
 
   // Listen for fullscreen changes to update UI state
-  if (typeof window !== 'undefined') {
-    window.onfullscreenchange = () => {
+  useEffect(() => {
+    const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-  }
-
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
   return (
     <div className="w-full flex flex-col gap-2">
       {/* Player Container */}
