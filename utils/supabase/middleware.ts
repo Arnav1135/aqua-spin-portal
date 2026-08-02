@@ -30,8 +30,13 @@ export async function updateSession(request: NextRequest) {
   // refreshing the auth token
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect all /developer and /admin routes
-  if ((request.nextUrl.pathname.startsWith('/developer') || request.nextUrl.pathname.startsWith('/admin')) && !user) {
+  // Protect all /developer, /admin, and /favorites routes
+  const isProtectedRoute = 
+    request.nextUrl.pathname.startsWith('/developer') || 
+    request.nextUrl.pathname.startsWith('/admin') ||
+    request.nextUrl.pathname.startsWith('/favorites');
+    
+  if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

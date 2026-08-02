@@ -11,6 +11,8 @@ export default async function Home({
 }) {
   const supabase = await createClient();
   const query = searchParams?.q || '';
+  
+  const { data: { user } } = await supabase.auth.getUser();
 
   let request = supabase
     .from('games')
@@ -55,6 +57,14 @@ export default async function Home({
                 className="w-full bg-neutral-900 border border-neutral-800 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-neutral-600"
               />
             </form>
+            {user && (
+              <Link 
+                href="/favorites" 
+                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+              >
+                My Favorites
+              </Link>
+            )}
             <Link 
               href="/developer" 
               className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"

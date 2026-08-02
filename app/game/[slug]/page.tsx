@@ -45,6 +45,46 @@ export default async function GamePage({ params }: Props) {
     notFound();
   }
 
+  // Check if current user has favorited this game
+  const { data: { user } } = await supabase.auth.getUser();
+  let isFavorited = false;
+  if (user) {
+    const { data: fav } = await supabase
+      .from('favorites')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('game_id', game.id)
+      .single();
+    if (fav) {
+      isFavorited = true;
+    }
+  }
+
+  const toggleFavorite = async () => {
+    'use server';
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return; // Silent fail if not logged in
+
+    if (isFavorited) {
+      // Remove favorite
+      await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('game_id', game.id);
+    } else {
+      // Add favorite
+      await supabase
+        .from('favorites')
+        .insert({ user_id: user.id, game_id: game.id });
+    }
+    
+    // Revalidate the page
+    const { revalidatePath } = require('next/cache');
+    revalidatePath(`/game/${game.slug}`);
+  };
+
   // Server-side security check: Prevent rendering if iframe_url lacks https
   if (!game.iframe_url?.startsWith('https://')) {
     return (
@@ -68,6 +108,14 @@ export default async function GamePage({ params }: Props) {
             <Link href="/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm">
               <ArrowLeft className="w-4 h-4" /> Back to Catalog
             </Link>
+            {user && (
+              <Link 
+                href="/favorites" 
+                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
+              >
+                My Favorites
+              </Link>
+            )}
             <Link 
               href="/developer" 
               className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
@@ -83,19 +131,37 @@ export default async function GamePage({ params }: Props) {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 pt-8">
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold mb-2">{game.title}</h1>
-          <p className="text-neutral-400 flex items-center gap-2">
-            By {game.developers ? (
-              <Link href={`/studio/${(game.developers as any).id}`} className="text-white font-medium hover:text-cyan-400 hover:underline transition-colors">
-                {(game.developers as any).studio_name}
-              </Link>
-            ) : (
-              <span className="text-white font-medium">Unknown Studio</span>
-            )}
-            <span className="w-1 h-1 bg-neutral-600 rounded-full" />
-            <span className="text-cyan-400">{game.category}</span>
-          </p>
+        <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">{game.title}</h1>
+            <p className="text-neutral-400 flex items-center gap-2">
+              By {game.developers ? (
+                <Link href={`/studio/${(game.developers as any).id}`} className="text-white font-medium hover:text-cyan-400 hover:underline transition-colors">
+                  {(game.developers as any).studio_name}
+                </Link>
+              ) : (
+                <span className="text-white font-medium">Unknown Studio</span>
+              )}
+              <span className="w-1 h-1 bg-neutral-600 rounded-full" />
+              <span className="text-cyan-400">{game.category}</span>
+            </p>
+          </div>
+
+          {user && (
+            <form action={toggleFavorite}>
+              <button 
+                type="submit"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  isFavorited 
+                    ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20' 
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white border border-neutral-700'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+                {isFavorited ? 'Favorited' : 'Favorite'}
+              </button>
+            </form>
+          )}
         </div>
 
         {/* The Sandbox Player */}
@@ -122,4 +188,4 @@ export default async function GamePage({ params }: Props) {
 }
 
 // Temporary import for the error state above
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Heart } from 'lucide-react';

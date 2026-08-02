@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StudioPage({ params }: Props) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
   const { data: developer, error: devError } = await supabase
     .from('developers')
@@ -55,6 +56,14 @@ export default async function StudioPage({ params }: Props) {
             <Link href="/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm">
               <ArrowLeft className="w-4 h-4" /> Back Home
             </Link>
+            {user && (
+              <Link 
+                href="/favorites" 
+                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
+              >
+                My Favorites
+              </Link>
+            )}
           </div>
           <Link href="/" className="flex items-center gap-2 group">
             <Gamepad2 className="w-5 h-5 text-cyan-400" />

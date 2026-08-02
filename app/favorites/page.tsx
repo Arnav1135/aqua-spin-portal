@@ -1,41 +1,38 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
-import { Gamepad2, ArrowLeft } from 'lucide-react';
+import { Gamepad2, ArrowLeft, Heart } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const revalidate = 60;
-
-type Props = {
-  params: { category: string }
+export const metadata: Metadata = {
+  title: 'My Favorites - Aqua Spin',
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = decodeURIComponent(params.category);
-  // Capitalize first letter
-  const title = category.charAt(0).toUpperCase() + category.slice(1);
-  return {
-    title: `${title} Games - Aqua Spin`,
-    description: `Play the best ${category} games on Aqua Spin`,
-  };
-}
-
-export default async function CategoryPage({ params }: Props) {
+export default async function FavoritesPage() {
   const supabase = await createClient();
-  const category = decodeURIComponent(params.category);
   const { data: { user } } = await supabase.auth.getUser();
-  
-  const { data: games, error } = await supabase
-    .from('games')
-    .select('id, title, slug, thumbnail_url, category, developers(id, studio_name)')
-    .eq('status', 'approved')
-    .ilike('category', category)
+
+  // Fetch the user's favorite games
+  // We join through the favorites table to games, and then to developers
+  const { data: favorites } = await supabase
+    .from('favorites')
+    .select(`
+      game_id,
+      games (
+        id, 
+        title, 
+        slug, 
+        thumbnail_url, 
+        category,
+        developers (id, studio_name)
+      )
+    `)
+    .eq('user_id', user?.id)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching category games:', error);
-  }
-
-  const displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
+  // Extract the games array from the favorites join
+  // Since games is technically a many-to-one relationship from favorites (a favorite has one game), 
+  // it returns an object or array of objects.
+  const games = favorites?.map(f => f.games).filter(Boolean) as any[];
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white selection:bg-cyan-500/30">
@@ -44,20 +41,6 @@ export default async function CategoryPage({ params }: Props) {
           <div className="flex items-center gap-4">
             <Link href="/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm">
               <ArrowLeft className="w-4 h-4" /> Back Home
-            </Link>
-            {user && (
-              <Link 
-                href="/favorites" 
-                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
-              >
-                My Favorites
-              </Link>
-            )}
-            <Link 
-              href="/developer" 
-              className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
-            >
-              Developer Portal
             </Link>
           </div>
           <Link href="/" className="flex items-center gap-2 group">
@@ -68,14 +51,17 @@ export default async function CategoryPage({ params }: Props) {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8 border-b border-white/10 pb-4">
-          <h1 className="text-4xl font-bold mb-2">{displayCategory} Games</h1>
-          <p className="text-neutral-400">Discover all {displayCategory.toLowerCase()} games approved for Aqua Spin.</p>
+        <div className="mb-8 border-b border-white/10 pb-4 flex items-center gap-3">
+          <Heart className="w-8 h-8 text-red-500 fill-current" />
+          <div>
+            <h1 className="text-4xl font-bold mb-1">My Favorites</h1>
+            <p className="text-neutral-400">Your personal collection of saved games.</p>
+          </div>
         </div>
 
         {games && games.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {games.map((game) => (
+            {games.map((game: any) => (
               <Link key={game.id} href={`/game/${game.slug}`} className="group">
                 <div className="aspect-[4/3] rounded-2xl bg-neutral-900 overflow-hidden relative border border-white/5 group-hover:border-cyan-500/30 transition-all shadow-lg group-hover:shadow-cyan-500/10">
                   {game.thumbnail_url ? (
@@ -92,11 +78,16 @@ export default async function CategoryPage({ params }: Props) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 w-full">
                     <h2 className="font-semibold text-lg leading-tight mb-1 truncate">{game.title}</h2>
-                    {game.developers && (
-                      <span className="text-xs text-neutral-400 truncate block mt-2">
-                        By {(game.developers as any).studio_name}
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs font-medium text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full uppercase tracking-wider">
+                        {game.category}
                       </span>
-                    )}
+                      {game.developers && (
+                        <span className="text-xs text-neutral-400 truncate max-w-[120px]">
+                          By {game.developers.studio_name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -104,8 +95,11 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         ) : (
           <div className="text-center py-24 text-neutral-500 border border-dashed border-neutral-800 rounded-3xl">
-            <Gamepad2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No games found in this category.</p>
+            <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>You haven't favorited any games yet.</p>
+            <Link href="/" className="inline-block mt-4 text-cyan-400 hover:text-cyan-300">
+              Browse the catalog
+            </Link>
           </div>
         )}
       </div>
