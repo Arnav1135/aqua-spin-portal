@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Gamepad2, LogOut, Upload, LayoutDashboard } from 'lucide-react';
+import { Gamepad2, LogOut, Upload, LayoutDashboard, BarChart3 } from 'lucide-react';
 
 export default async function DeveloperLayout({
   children,
@@ -48,6 +48,9 @@ export default async function DeveloperLayout({
               </Link>
               <Link href="/developer/submit" className="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-300 hover:text-white hover:bg-white/5 transition-colors">
                 <Upload className="w-4 h-4" /> Submit Game
+              </Link>
+              <Link href="/developer/analytics" className="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-300 hover:text-white hover:bg-white/5 transition-colors">
+                <BarChart3 className="w-4 h-4" /> Analytics
               </Link>
             </>
           ) : (
