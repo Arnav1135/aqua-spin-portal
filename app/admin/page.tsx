@@ -122,6 +122,12 @@ export default async function AdminReviewQueue() {
 
             </div>
           ))
+        ) : (
+          <div className="text-center py-24 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-3xl">
+            <CheckCircle className="w-12 h-12 text-green-500/50 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-white mb-2">Queue is empty</h3>
+            <p className="text-neutral-500">There are no pending games to review.</p>
+          </div>
         )}
       </div>
 
