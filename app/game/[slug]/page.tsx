@@ -211,6 +211,11 @@ export default async function GamePage({ params }: Props) {
           </div>
         </div>
 
+        {/* Report Button */}
+        <div className="flex justify-end">
+          <ReportForm gameId={game.id} />
+        </div>
+
         {/* Reviews Section */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-6">Player Reviews</h2>
@@ -260,3 +265,4 @@ export default async function GamePage({ params }: Props) {
 // Temporary import for the error state above
 import { AlertTriangle, Heart, Star } from 'lucide-react';
 import { ReviewForm } from '@/components/ReviewForm';
+import { ReportForm } from '@/components/ReportForm';

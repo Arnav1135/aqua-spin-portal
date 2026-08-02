@@ -14,6 +14,13 @@ export default async function AdminReviewQueue() {
     .eq('status', 'pending_review')
     .order('created_at', { ascending: true });
 
+  // Fetch pending takedown requests
+  const { data: reports } = await supabase
+    .from('takedown_requests')
+    .select('*, games(title, slug, developers(studio_name))')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true });
+
   const approveGame = async (formData: FormData) => {
     'use server';
     const gameId = formData.get('game_id') as string;
@@ -115,14 +122,79 @@ export default async function AdminReviewQueue() {
 
             </div>
           ))
+        )}
+      </div>
+
+      {/* Takedown Requests Section */}
+      <div className="mt-16 mb-8">
+        <h1 className="text-3xl font-bold mb-1 text-red-100 flex items-center gap-3">
+          <AlertTriangle className="w-8 h-8 text-red-500" /> Takedown Requests
+        </h1>
+        <p className="text-red-300/60">Review DMCA and inappropriate content reports.</p>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {reports && reports.length > 0 ? (
+          reports.map((report) => (
+            <div key={report.id} className="bg-red-950/20 border border-red-900/30 rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+              <div className="flex-1">
+                <div className="mb-4">
+                  <span className="text-xs font-bold text-red-400 bg-red-500/10 px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block">
+                    {report.reason}
+                  </span>
+                  <h2 className="text-xl font-bold text-white mb-1">
+                    Reported Game: {(report.games as any)?.title || 'Unknown Game'}
+                  </h2>
+                  <p className="text-neutral-400 text-sm">
+                    Developer: {((report.games as any)?.developers as any)?.studio_name || 'Unknown'}
+                  </p>
+                  <p className="text-neutral-500 text-sm mt-1">
+                    Reporter Email: <span className="text-neutral-300">{report.reporter_email}</span>
+                  </p>
+                </div>
+                
+                <div className="bg-black/40 p-4 rounded-xl border border-red-500/10">
+                  <h4 className="text-sm font-semibold text-neutral-300 mb-2">Report Details:</h4>
+                  <p className="text-neutral-300 text-sm leading-relaxed whitespace-pre-wrap">
+                    {report.description || 'No additional details provided.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex md:flex-col gap-3 justify-center md:border-l border-red-900/30 md:pl-6 min-w-[200px]">
+                <form action={async () => {
+                  'use server';
+                  const { dismissReport } = await import('@/app/actions/admin_reports');
+                  await dismissReport(report.id);
+                }}>
+                  <button className="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-semibold rounded-lg px-6 py-3 transition-colors flex items-center justify-center gap-2">
+                    Dismiss Report
+                  </button>
+                </form>
+
+                <form action={async () => {
+                  'use server';
+                  const { suspendGame } = await import('@/app/actions/admin_reports');
+                  await suspendGame(report.id, report.game_id);
+                }}>
+                  <button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-6 py-3 transition-colors flex items-center justify-center gap-2">
+                    <ShieldAlert className="w-5 h-5" /> Suspend Game
+                  </button>
+                </form>
+              </div>
+            </div>
+          ))
         ) : (
           <div className="text-center py-24 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-3xl">
-            <CheckCircle className="w-12 h-12 text-green-500/50 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-white mb-2">Queue is empty</h3>
-            <p className="text-neutral-500">There are no pending games to review.</p>
+            <ShieldCheck className="w-12 h-12 text-green-500/50 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-white mb-2">All Clear</h3>
+            <p className="text-neutral-500">There are no pending takedown requests.</p>
           </div>
         )}
       </div>
     </div>
   );
 }
+
+import { AlertTriangle, ShieldAlert, ShieldCheck } from 'lucide-react';
