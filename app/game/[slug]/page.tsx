@@ -4,6 +4,7 @@ import { GamePlayer } from '@/components/GamePlayer';
 import Link from 'next/link';
 import { ArrowLeft, Gamepad2, Info } from 'lucide-react';
 import type { Metadata } from 'next';
+import { Header } from '@/components/Header';
 
 export const revalidate = 60;
 
@@ -121,33 +122,7 @@ export default async function GamePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white selection:bg-cyan-500/30 pb-12">
-      <header className="border-b border-white/10 bg-neutral-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 text-sm">
-              <ArrowLeft className="w-4 h-4" /> Back to Catalog
-            </Link>
-            {user && (
-              <Link 
-                href="/favorites" 
-                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
-              >
-                My Favorites
-              </Link>
-            )}
-            <Link 
-              href="/developer" 
-              className="text-sm font-medium text-neutral-400 hover:text-white transition-colors ml-4"
-            >
-              Developer Portal
-            </Link>
-          </div>
-          <Link href="/" className="flex items-center gap-2 group">
-            <Gamepad2 className="w-5 h-5 text-cyan-400" />
-            <span className="font-bold tracking-tight">Aqua Spin</span>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 pt-8">
         <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">

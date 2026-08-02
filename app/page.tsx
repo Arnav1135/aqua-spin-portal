@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import { Gamepad2, Search } from 'lucide-react';
+import { Header } from '@/components/Header';
 
 export const revalidate = 60; // Revalidate the page every 60 seconds
 
@@ -37,43 +38,7 @@ export default async function Home({
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white selection:bg-cyan-500/30">
-      <header className="border-b border-white/10 bg-neutral-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-cyan-500/10 p-2 rounded-xl group-hover:bg-cyan-500/20 transition-colors">
-              <Gamepad2 className="w-6 h-6 text-cyan-400" />
-            </div>
-            <span className="font-bold text-xl tracking-tight">Aqua Spin</span>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            <form className="relative hidden md:block w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-              <input 
-                name="q"
-                defaultValue={query}
-                type="text" 
-                placeholder="Search for games..."
-                className="w-full bg-neutral-900 border border-neutral-800 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-neutral-600"
-              />
-            </form>
-            {user && (
-              <Link 
-                href="/favorites" 
-                className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
-              >
-                My Favorites
-              </Link>
-            )}
-            <Link 
-              href="/developer" 
-              className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
-            >
-              Developer Portal
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
