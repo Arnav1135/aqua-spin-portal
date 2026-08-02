@@ -98,7 +98,7 @@ export default async function Home({
                       </span>
                       {game.developers && (
                         <span className="text-xs text-neutral-400 truncate max-w-[120px]">
-                          By {game.developers.studio_name}
+                          By {(game.developers as any).studio_name}
                         </span>
                       )}
                     </div>

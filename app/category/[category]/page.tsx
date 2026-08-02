@@ -85,7 +85,7 @@ export default async function CategoryPage({ params }: Props) {
                     <h2 className="font-semibold text-lg leading-tight mb-1 truncate">{game.title}</h2>
                     {game.developers && (
                       <span className="text-xs text-neutral-400 truncate block mt-2">
-                        By {game.developers.studio_name}
+                        By {(game.developers as any).studio_name}
                       </span>
                     )}
                   </div>

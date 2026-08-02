@@ -87,8 +87,8 @@ export default async function GamePage({ params }: Props) {
           <h1 className="text-4xl font-bold mb-2">{game.title}</h1>
           <p className="text-neutral-400 flex items-center gap-2">
             By {game.developers ? (
-              <Link href={`/studio/${game.developers.id}`} className="text-white font-medium hover:text-cyan-400 hover:underline transition-colors">
-                {game.developers.studio_name}
+              <Link href={`/studio/${(game.developers as any).id}`} className="text-white font-medium hover:text-cyan-400 hover:underline transition-colors">
+                {(game.developers as any).studio_name}
               </Link>
             ) : (
               <span className="text-white font-medium">Unknown Studio</span>
