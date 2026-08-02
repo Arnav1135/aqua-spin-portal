@@ -48,6 +48,8 @@ export default async function GamePage({ params }: Props) {
   // Check if current user has favorited this game
   const { data: { user } } = await supabase.auth.getUser();
   let isFavorited = false;
+  let userReview = null;
+  
   if (user) {
     const { data: fav } = await supabase
       .from('favorites')
@@ -57,6 +59,23 @@ export default async function GamePage({ params }: Props) {
       .single();
     if (fav) {
       isFavorited = true;
+    }
+  }
+
+  // Fetch all reviews
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('*, profiles(email)')
+    .eq('game_id', game.id)
+    .order('created_at', { ascending: false });
+
+  let averageRating = 0;
+  if (reviews && reviews.length > 0) {
+    const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+    averageRating = total / reviews.length;
+    
+    if (user) {
+      userReview = reviews.find(r => r.user_id === user.id) || null;
     }
   }
 
@@ -144,6 +163,15 @@ export default async function GamePage({ params }: Props) {
               )}
               <span className="w-1 h-1 bg-neutral-600 rounded-full" />
               <span className="text-cyan-400">{game.category}</span>
+              {reviews && reviews.length > 0 && (
+                <>
+                  <span className="w-1 h-1 bg-neutral-600 rounded-full" />
+                  <span className="flex items-center gap-1 text-yellow-400 font-medium">
+                    <Star className="w-4 h-4 fill-current" />
+                    {averageRating.toFixed(1)} <span className="text-neutral-500 font-normal">({reviews.length})</span>
+                  </span>
+                </>
+              )}
             </p>
           </div>
 
@@ -182,10 +210,53 @@ export default async function GamePage({ params }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-6">Player Reviews</h2>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            {reviews && reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div key={review.id} className="bg-neutral-900/50 border border-neutral-800 p-4 rounded-xl">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="font-medium">
+                      {(review.profiles as any)?.email?.split('@')[0] || 'Anonymous'}
+                    </div>
+                    <div className="flex gap-0.5 text-yellow-400">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-neutral-700'}`} />
+                      ))}
+                    </div>
+                  </div>
+                  {review.content && (
+                    <p className="text-neutral-300 text-sm mt-2">{review.content}</p>
+                  )}
+                  <div className="text-xs text-neutral-500 mt-3">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-8 text-center text-neutral-500 bg-neutral-900/30 rounded-xl border border-dashed border-neutral-800">
+                <p>No reviews yet. Be the first to review!</p>
+              </div>
+            )}
+          </div>
+
+          {user && (
+            <ReviewForm 
+              gameId={game.id} 
+              initialRating={userReview?.rating || 0}
+              initialContent={userReview?.content || ''}
+            />
+          )}
+        </div>
       </main>
     </div>
   );
 }
 
 // Temporary import for the error state above
-import { AlertTriangle, Heart } from 'lucide-react';
+import { AlertTriangle, Heart, Star } from 'lucide-react';
+import { ReviewForm } from '@/components/ReviewForm';

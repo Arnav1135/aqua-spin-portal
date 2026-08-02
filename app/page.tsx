@@ -16,7 +16,7 @@ export default async function Home({
 
   let request = supabase
     .from('games')
-    .select('id, title, slug, thumbnail_url, category, developers(id, studio_name)')
+    .select('id, title, slug, thumbnail_url, category, developers(id, studio_name), reviews(rating)')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(24);
@@ -103,9 +103,17 @@ export default async function Home({
                   <div className="absolute bottom-0 left-0 p-4 w-full">
                     <h2 className="font-semibold text-lg leading-tight mb-1 truncate">{game.title}</h2>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs font-medium text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full uppercase tracking-wider">
-                        {game.category}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full uppercase tracking-wider">
+                          {game.category}
+                        </span>
+                        {(game.reviews as any[])?.length > 0 && (
+                          <span className="flex items-center gap-1 text-xs font-medium text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full">
+                            <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            {((game.reviews as any[]).reduce((sum, r) => sum + r.rating, 0) / (game.reviews as any[]).length).toFixed(1)}
+                          </span>
+                        )}
+                      </div>
                       {game.developers && (
                         <span className="text-xs text-neutral-400 truncate max-w-[120px]">
                           By {(game.developers as any).studio_name}
